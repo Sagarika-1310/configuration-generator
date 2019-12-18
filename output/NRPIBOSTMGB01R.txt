@@ -1,0 +1,72 @@
+!+=======================================================+
+!    		Information
+!+=======================================================+
+ 
+This config is for Site Oslo
+
+Device Host Name: NRPIBOSTMGB01R
+
+Mgmt IP Address: 10.11.20.44
+
+
+Migration Notes   
+
+!+=======================================================+
+!    LAN Migration Notes
+!+=======================================================+
+
+ !
+ track 99 ip route 10.10.10.101 255.255.255.255 reachability
+ !
+ interface GigabitEthernet0/1
+  ip address 192.168.150.10 255.255.255.0
+  no ip redirects
+  no ip unreachables
+  no ip proxy-arp   
+  vrrp 1 ip 192.168.150.9
+  vrrp 1 priority 105
+  vrrp 1 preempt delay minimum 20
+  vrrp 1 track 99 decrement 10
+  speed 1000
+  duplex full
+  no shut
+ !
+ !
+ !
+ router eigrp 3
+ log-adjacency-changes
+ redistribute bgp 65001 metric 4000 10 255 1 1500 route-map bgp_to_eigrp
+ network 192.168.150.0 0.0.0.255
+ no auto-summary
+
+ip route 0.0.0.0 0.0.0.0 192.168.150.99
+
+ router bgp 65001
+ network 192.168.150.0 mask 255.255.255.5
+!
+!end of config
+
+!+=======================================================+
+! Migration tests
+!+=======================================================+
+!
+!!!!! Verify all the commands are configured in the routers
+!
+show run
+
+
+!!!!!!! check speed/duplex and no interface error.
+
+
+clear arp
+clear ip bgp * soft
+!
+!!!!!!! ensure all neighbors are up -
+!
+sh ip bgp sum
+!
+customer application test
+
+!+=======================================================+
+! End
+!+=======================================================+
